@@ -67,7 +67,7 @@ yes | pip install OpenCanary
 cat >opencanary.conf <<EOL
 {
     "device.node_id": "$hs",
-    "git.enabled": false,
+    "git.enabled": true,
     "git.port" : 9418,
     "ftp.enabled": true,
     "ftp.port": 21,
@@ -127,7 +127,7 @@ cat >opencanary.conf <<EOL
             }
         }
     },
-    "portscan.enabled": false,
+    "portscan.enabled": true,
     "portscan.logfile":"/var/log/kern.log",
     "portscan.synrate": 5,
     "portscan.nmaposrate": 5,
@@ -150,7 +150,7 @@ cat >opencanary.conf <<EOL
     "snmp.port": 161,
     "ntp.enabled": false,
     "ntp.port": "123",
-    "tftp.enabled": false,
+    "tftp.enabled": true,
     "tftp.port": 69,
     "tcpbanner.maxnum":10,
     "tcpbanner.enabled": false,
