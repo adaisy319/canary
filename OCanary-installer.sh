@@ -33,31 +33,11 @@ read -p 'What is the IP address for your syslog server? ' syslogip
 read -p 'What port is your syslog server listening on? ' syslogport
 
 # Update the OS
-apt update && apt full-upgrade -y
+yum update 
 
 # Install dependencies
-apt install -y unattended-upgrades build-essential libssl-dev libffi-dev python-dev python-pip python-virtualenv
-
-# Set up unattended-upgrades file
-cat >/etc/apt/apt.conf.d/50unattended-upgrades <<EOL
-Unattended-Upgrade::Allowed-Origins {
-	"\${distro_id}:\${distro_codename}";
-	"\${distro_id}:\${distro_codename}-security";
-	"\${distro_id}ESM:\${distro_codename}";
-	"\${distro_id}:\${distro_codename}-updates";
-}
-Unattended-Upgrade::Remove-Unused-Dependencies "true";
-Unattended-Upgrade::Automatic-Reboot "true";
-Unattended-Upgrade::Automatic-Reboot-Time "02:38";
-EOL
-
-# Enable unattended upgrades
-cat >/etc/apt/apt.conf.d/20auto-upgrades <<EOL
-APT::Periodic::Update-Package-Lists "1";
-APT::Periodic::Download-Upgradeable-Packages "1";
-APT::Periodic::AutocleanInterval "7";
-APT::Periodic::Unattended-Upgrade "1";
-EOL
+apt install -y  openssl-devel libffi-devel python-devel python-pip python-virtualenv
+groupinstall 'Development Tools'
 
 # Create a python virtualenv
 virtualenv env/
@@ -146,12 +126,12 @@ cat >opencanary.conf <<EOL
     "mysql.enabled": false,
     "mysql.port": 3306,
     "mysql.banner": "5.5.43-0ubuntu0.14.04.1",
-    "ssh.enabled": false,
+    "ssh.enabled": true,
     "ssh.port": 22,
     "ssh.version": "SSH-2.0-OpenSSH_5.1p1 Debian-4",
     "redis.enabled": false,
     "redis.port": 6379,
-    "rdp.enabled": false,
+    "rdp.enabled": true,
     "rdp.port": 3389,
     "sip.enabled": false,
     "sip.port": 5060,
