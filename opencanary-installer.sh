@@ -9,6 +9,9 @@ then
       # If the hostname is empty, do nothing. Set the hostname variable to use
       echo "Not changing hostname"
       hs=$(hostname)
+else
+# Validate the hostname provided matches the required pattern
+while [[ ! "$hs" =~ '[A-Za-z ]' ]]; 
 done
 
 # Reset the hostname
@@ -30,20 +33,30 @@ read -p 'What is the IP address for your syslog server? ' syslogip
 read -p 'What port is your syslog server listening on? ' syslogport
 
 # Update the OS
-yum update 
+apt update && apt full-upgrade -y
 
 # Install dependencies
-yum install -y yum-cron make automake gcc gcc-c++ kernel-devel openssl-devel libffi-devel python-devel python-pip python-virtualenv
+apt install -y unattended-upgrades build-essential libssl-dev libffi-dev python-dev python-pip python-virtualenv
 
 # Set up unattended-upgrades file
-cat >/etc/yum/yum-cron.conf<<EOL
-update_cmd = security
-apply_updates = yes
+cat >/etc/apt/apt.conf.d/50unattended-upgrades <<EOL
+Unattended-Upgrade::Allowed-Origins {
+	"\${distro_id}:\${distro_codename}";
+	"\${distro_id}:\${distro_codename}-security";
+	"\${distro_id}ESM:\${distro_codename}";
+	"\${distro_id}:\${distro_codename}-updates";
+}
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:38";
 EOL
 
 # Enable unattended upgrades
-cat > /etc/yum/yum-cron.conf<<EOL
-sudo systemctl enable yum-cron
+cat >/etc/apt/apt.conf.d/20auto-upgrades <<EOL
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Unattended-Upgrade "1";
 EOL
 
 # Create a python virtualenv
@@ -63,7 +76,7 @@ yes | pip install OpenCanary
 cat >opencanary.conf <<EOL
 {
     "device.node_id": "$hs",
-    "git.enabled": true,
+    "git.enabled": false,
     "git.port" : 9418,
     "ftp.enabled": true,
     "ftp.port": 21,
@@ -123,7 +136,7 @@ cat >opencanary.conf <<EOL
             }
         }
     },
-    "portscan.enabled": true,
+    "portscan.enabled": false,
     "portscan.logfile":"/var/log/kern.log",
     "portscan.synrate": 5,
     "portscan.nmaposrate": 5,
@@ -146,7 +159,7 @@ cat >opencanary.conf <<EOL
     "snmp.port": 161,
     "ntp.enabled": false,
     "ntp.port": "123",
-    "tftp.enabled": true,
+    "tftp.enabled": false,
     "tftp.port": 69,
     "tcpbanner.maxnum":10,
     "tcpbanner.enabled": false,
@@ -194,7 +207,6 @@ cat >/etc/systemd/system/opencanary.service <<EOL
 Description=OpenCanary honeypot
 After=syslog.target
 After=network.target
-
 [Service]
 User=$user
 Restart=always
@@ -202,7 +214,6 @@ Environment=VIRTUAL_ENV=/home/pi/env/
 Environment=PATH=\$VIRTUAL_ENV/bin:/usr/bin:\$PATH
 WorkingDirectory=$wd/env/bin
 ExecStart=$wd/env/bin/opencanaryd --dev
-
 [Install]
 WantedBy=multi-user.target
 EOL
