@@ -9,9 +9,6 @@ then
       # If the hostname is empty, do nothing. Set the hostname variable to use
       echo "Not changing hostname"
       hs=$(hostname)
-else
-# Validate the hostname provided matches the required pattern
-while [[ ! "$hs" =~ '[A-Za-z ]' ]]; 
 done
 
 # Reset the hostname
