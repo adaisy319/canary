@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Get the device name to use for the canary
-read -p 'What hostname do you want to use? [A-Z,a-z]: ' hs
+read -p 'What hostname do you want to use? [A-Z,a-z,0-9]: ' hs
 
 # Check whether the hostname input is empty
 if test -z "$hs"
