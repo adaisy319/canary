@@ -45,10 +45,6 @@ virtualenv canary-env/
 pip install scapy
 pip install opencanary
 
-# Base stuff installed - now make the user this will run as
-
-useradd canary  
-
 # Generate a new config file
 cat >opencanary.conf <<EOL
 {
@@ -176,7 +172,12 @@ EOL
 cp -f opencanary.conf /root/.opencanary.conf
 
 wd=$PWD
-user=`whoami`
+user=`whoami` 
+
+# Base stuff installed - now make the user this will run as
+
+useradd canary  
+
 
 # Now make sure the service will run on boot
 printf "[Unit]
