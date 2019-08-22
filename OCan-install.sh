@@ -33,7 +33,7 @@ read -p 'What is the IP address for your syslog server? ' syslogip
 # Get the port to use for the syslog server
 read -p 'What port is your syslog server listening on? ' syslogport
 
-
+#install dependencies 
 sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf
 yum install epel-release -y
 yum install git gcc make python-devel python2-pip wget vim python-virtualenv bash-completion open-vm-tools gcc-c++ screen haveged pcapy -y
@@ -44,8 +44,6 @@ virtualenv canary-env/
 . canary-env/bin/activate
 pip install scapy
 pip install opencanary
-
- 
 
 # Base stuff installed - now make the user this will run as
 
@@ -200,3 +198,6 @@ systemctl enable opencanary.service
 su canary -c "opencanaryd --copyconfig"
 
 systemctl start opencanary.service
+
+#reboot canary
+reboot
