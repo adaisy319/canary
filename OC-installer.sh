@@ -11,7 +11,7 @@ then
       hs=$(hostname)
 else
 # Validate the hostname provided matches the required pattern
-while [[ ! "$hs" =~ '[A-Za-z ]' ]]; do
+while [[ ! "$hs" =~ ^[a-z,A-Z,0-9]{1,}$ ]]; do
     read -p "Wrong hostname format. Re-enter using only A-Z, or a-z: " hs
 done
 
