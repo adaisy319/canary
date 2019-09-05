@@ -10,7 +10,7 @@ then
       echo "Not changing hostname"
       hs=$(hostname)
 else
-# Validate the hostname provided matches the required pattern
+# Validate the hostname providehttps://github.com/adaisy319/canary/blob/master/OC-installer.shd matches the required pattern
 while [[ ! "$hs" =~ ^[a-z,A-Z,0-9]{1,}$ ]]; do
     read -p "Wrong hostname format. Re-enter using only A-Z, or a-z: " hs
 done
