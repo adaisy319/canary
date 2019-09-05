@@ -50,7 +50,14 @@ yes | pip install rdpy
 yes | pip install scapy pcapy
 
 # Install OpenCanary
-yes | pip install OpenCanary
+yes | pip install OpenCanary 
+
+#Install SMB
+yum install samba samba-client samba-common
+
+#set up firewall
+firewall-cmd --permanent --zone=public --add-service=samba 
+firewall-cmd --reload 
 
 # Generate a new config file
 cat >opencanary.conf <<EOL
@@ -129,14 +136,102 @@ cat >opencanary.conf <<EOL
     "tftp.enabled": true,
     "mssql.enabled": true,
 }
-EOL
+EOL 
+
 
 # Replace the default created opencanary conf file
 cp -f opencanary.conf /root/.opencanary.conf
 
 wd=$PWD
-user=`whoami`
+user=`whoami` 
 
+#SMB config file
+cat >/etc/samba/smb.conf <<EOL  
+[global]
+   workgroup = nii.local
+        server string = Windows 2003 File Server
+   dns proxy = no
+;   interfaces = 127.0.0.0/8 eth0
+;   bind interfaces only = yes
+   log file = /var/log/samba/log.all
+   max log size = 1000
+
+# for opencanary purposes
+ log level = 0
+ vfs object = full_audit
+ full_audit:prefix = %U|%I|%i|%m|%S|%L|%R|%a|%T|%D
+ full_audit:success = pread
+ full_audit:failure = none
+ full_audit:facility = local7
+ full_audit:priority = notice
+ max log size = 100
+
+   syslog = 0
+   panic action = /usr/share/samba/panic-action %d
+   server role = standalone server
+   passdb backend = tdbsam
+   obey pam restrictions = yes
+   unix password sync = no
+   passwd program = /usr/bin/passwd %u
+   passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+   pam password change = yes
+   map to guest = bad user
+;   logon path = \\%N\profiles\%U
+;   logon drive = H:
+;   logon script = logon.cmd
+; add user script = /usr/sbin/adduser --quiet --disabled-password --gecos "" %u
+; add machine script  = /usr/sbin/useradd -g machines -c "%u machine account" -d /var/lib/samba -s /bin/false %u
+; add group script = /usr/sbin/addgroup --force-badname %g
+;   include = /home/samba/etc/smb.conf.%m
+;   idmap uid = 10000-20000
+;   idmap gid = 10000-20000
+;   template shell = /bin/bash
+;   usershare max shares = 100
+   usershare allow guests = yes
+;[homes]
+;   comment = Home Directories
+;   browseable = no
+;   read only = yes
+;   create mask = 0700
+;   directory mask = 0700
+;   valid users = %S
+;[netlogon]
+;   comment = Network Logon Service
+;   path = /home/samba/netlogon
+;   guest ok = yes
+;   read only = yes
+
+;[profiles]
+;   comment = Users profiles
+;   path = /home/samba/profiles
+;   guest ok = no
+;   browseable = no 
+;   create mask = 0600
+;   directory mask = 0700
+
+[printers]
+   comment = All Printers
+   browseable = no
+   path = /var/spool/samba 
+   printable = yes
+   guest ok = no
+   read only = yes
+   create mask = 0700
+[print$]
+   comment = Printer Drivers
+   path = /var/lib/samba/printers
+   browseable = yes   
+   read only = yes
+   guest ok = no
+;   write list = root, @lpadmin
+
+# for opencanary purposes
+[Documents]
+   comment = Human Resource Documents Backup
+   path = /home/inr/share
+   guest ok = yes
+   read only = yes
+   browseable = yes
 # Create a systemd service file
 cat >/etc/systemd/system/opencanary.service <<EOL
 [Unit]
@@ -152,7 +247,13 @@ WorkingDirectory=$wd/env/bin
 ExecStart=$wd/env/bin/opencanaryd --dev
 [Install]
 WantedBy=multi-user.target
-EOL
+EOL 
+
+# Replace the default created SMB config file
+cp -f /etc/samba/smb.conf /root/etc/samba/smb.conf
+
+wd=$PWD
+user=`whoami` 
 
 # Reload systemd services
 systemctl daemon-reload
