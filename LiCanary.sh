@@ -55,9 +55,10 @@ yes | pip install OpenCanary
 # Generate a new config file
 cat >opencanary.conf <<EOL
 {
-    "ftp.enabled": true,
-    "ftp.port": 21,
+    "device.node_id": "opencanary-1",
     "ftp.banner": "FTP server ready",
+    "ftp.enabled": true,
+    "ftp.port":21,
     "http.banner": "Apache/2.2.22 (Ubuntu)",
     "http.enabled": true,
     "http.port": 80,
@@ -72,13 +73,9 @@ cat >opencanary.conf <<EOL
             "name": "nasLogin"
         }
     ],
-    "ssh.enabled": true,
-	 "ssh.port": 8022,
- 	"ssh.version": "SSH-2.0-OpenSSH_5.1p1 Debian-4",
-    ],
     "logger": {
-        "class": "PyLogger",
-        "kwargs": {
+        "class" : "PyLogger",
+        "kwargs" : {
             "formatters": {
                 "plain": {
                     "format": "%(message)s"
@@ -89,20 +86,36 @@ cat >opencanary.conf <<EOL
                     "class": "logging.StreamHandler",
                     "stream": "ext://sys.stdout"
                 },
-                "syslog-unix": {
-                    "class": "logging.handlers.SysLogHandler",
-                    "address": [
-                        "$syslogip",
-                        $syslogport
-                    ],
-                    "socktype": "ext://socket.SOCK_DGRAM"
-                },
                 "file": {
                     "class": "logging.FileHandler",
                     "filename": "/var/tmp/opencanary.log"
+                },
+                "syslog-unix": {
+                    "class": "logging.handlers.SysLogHandler",
+                    "address": ["localhost", 514],
+                    "socktype": "ext://socket.SOCK_DGRAM"
+                },
+                "json-tcp": {
+                    "class": "opencanary.logger.SocketJSONHandler",
+                    "host": "127.0.0.1",
+                    "port": 1514
                 }
             }
         }
+    },
+    "portscan.synrate": "5",
+    "mysql.banner": "5.5.43-0ubuntu0.14.04.1",
+    "mysql.port": 3306,
+    "mysql.enabled": true,
+    "ssh.enabled": true,
+    "ssh.port": 8022,
+    "ssh.version": "SSH-2.0-OpenSSH_5.1p1 Debian-4",
+    "rdp.enabled": false,
+    "sip.enabled": true,
+    "ntp.enabled": false,
+    "tftp.enabled": true,
+    "ntp.port": "123",
+    "vnc.enabled": true
 }
 EOL
 
