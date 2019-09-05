@@ -155,6 +155,16 @@ cat >/etc/samba/smb.conf <<EOL
 ;   bind interfaces only = yes
    log file = /var/log/samba/log.all
    max log size = 1000
+EOL 
+
+cat>/etc/rsyslog.conf <<EOL 
+$FileCreateMode 0644
+
+local7.*
+
+/var/log/samba-audit.log
+ 
+EOL 
 
 # for opencanary purposes
  log level = 0
