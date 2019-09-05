@@ -60,7 +60,7 @@ firewall-cmd --permanent --zone=public --add-service=samba
 firewall-cmd --reload 
 
 # Generate a new config file
-cat >opencanary.conf <<EOL
+cat >opencanary.conf<<EOL
 {   
     "device.node_id": "opencanary-1",
     "ftp.banner": "FTP server ready",
